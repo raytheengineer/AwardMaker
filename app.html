@@ -334,7 +334,7 @@
             
             // Get field values
             const fieldValues = {
-                awardeeName: document.getElementById('awardeeName').value || 'Recipient Name',
+                awardeeName: document.getElementById('awardeeName').value || 'Awardee M. Name, PhD',
                 year: document.getElementById('year').value || String(currentYear),
                 startYear: document.getElementById('startYear').value || String(currentYear - 2),
                 endYear: document.getElementById('endYear').value || String(currentYear)
@@ -363,58 +363,11 @@
                 if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
                     console.log('Found name placeholder, updating to:', fieldValues.awardeeName);
                     
-                    // Get the text element's original position to calculate its natural center
-                    const originalTransform = textEl.getAttribute('transform');
-                    let originalX = 0;
-                    let originalY = 0;
+                    // Simply replace the text content, keeping original positioning
+                    // The template text "Awardee M. Name, PhD" is already positioned correctly
+                    textEl.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
                     
-                    // Extract original position
-                    if (originalTransform && originalTransform.includes('matrix')) {
-                        const matrixMatch = originalTransform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\)/);
-                        if (matrixMatch) {
-                            originalX = parseFloat(matrixMatch[1]);
-                            originalY = parseFloat(matrixMatch[2]);
-                        }
-                    } else if (textEl.getAttribute('x')) {
-                        originalX = parseFloat(textEl.getAttribute('x') || '0');
-                        originalY = parseFloat(textEl.getAttribute('y') || '0');
-                    }
-                    
-                    // Calculate the center position based on the original text's probable width
-                    // Get text bounding box to find its width
-                    let textCenterX = originalX;
-                    try {
-                        const textBBox = textEl.getBBox();
-                        const textWidth = textBBox.width;
-                        textCenterX = originalX + (textWidth / 2);
-                        console.log(`Original position: x=${originalX}, textWidth=${textWidth}, calculated center: ${textCenterX}`);
-                    } catch (e) {
-                        // Fallback to template-based centering if getBBox fails
-                        console.log('getBBox failed, using template centering');
-                        if (currentTemplate === 'zweifach') {
-                            textCenterX = 252;
-                        } else if (currentTemplate === 'landis') {
-                            textCenterX = 180;
-                        } else if (currentTemplate === 'president') {
-                            textCenterX = 252;
-                        }
-                    }
-                    
-                    // Update position to use the calculated center
-                    if (originalTransform && originalTransform.includes('matrix')) {
-                        textEl.setAttribute('transform', `matrix(1 0 0 1 ${textCenterX} ${originalY})`);
-                    } else {
-                        textEl.setAttribute('x', textCenterX);
-                        if (originalY) textEl.setAttribute('y', originalY);
-                    }
-                    
-                    // Set text-anchor to middle for center alignment
-                    textEl.setAttribute('text-anchor', 'middle');
-                    
-                    // Update the text content
-                    textEl.textContent = fieldValues.awardeeName;
-                    
-                    console.log(`Centered name at x:${textCenterX} with text-anchor:middle`);
+                    console.log('Replaced name text while preserving original position');
                 }
                 
                 // Check for Year
@@ -441,53 +394,10 @@
                 if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
                     console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
                     
-                    // Apply same centering logic as method 2
-                    const originalTransform = el.getAttribute('transform');
-                    let originalX = 0;
-                    let originalY = 0;
+                    // Simply replace the text content, keeping original positioning
+                    el.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
                     
-                    // Extract original position
-                    if (originalTransform && originalTransform.includes('matrix')) {
-                        const matrixMatch = originalTransform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\)/);
-                        if (matrixMatch) {
-                            originalX = parseFloat(matrixMatch[1]);
-                            originalY = parseFloat(matrixMatch[2]);
-                        }
-                    } else if (el.getAttribute('x')) {
-                        originalX = parseFloat(el.getAttribute('x') || '0');
-                        originalY = parseFloat(el.getAttribute('y') || '0');
-                    }
-                    
-                    // Calculate center position based on original text
-                    let textCenterX = originalX;
-                    try {
-                        const textBBox = el.getBBox();
-                        const textWidth = textBBox.width;
-                        textCenterX = originalX + (textWidth / 2);
-                        console.log(`ID method: Original x=${originalX}, textWidth=${textWidth}, center=${textCenterX}`);
-                    } catch (e) {
-                        // Fallback to template centering
-                        console.log('ID method: getBBox failed, using template centering');
-                        if (currentTemplate === 'zweifach') {
-                            textCenterX = 252;
-                        } else if (currentTemplate === 'landis') {
-                            textCenterX = 180;
-                        } else if (currentTemplate === 'president') {
-                            textCenterX = 252;
-                        }
-                    }
-                    
-                    // Update position
-                    if (originalTransform && originalTransform.includes('matrix')) {
-                        el.setAttribute('transform', `matrix(1 0 0 1 ${textCenterX} ${originalY})`);
-                    } else {
-                        el.setAttribute('x', textCenterX);
-                        if (originalY) el.setAttribute('y', originalY);
-                    }
-                    
-                    el.setAttribute('text-anchor', 'middle');
-                    el.textContent = fieldValues.awardeeName;
-                    console.log(`Centered name (by ID) at x:${textCenterX}`);
+                    console.log('Replaced name text (by ID) while preserving original position');
                 }
             }
 
