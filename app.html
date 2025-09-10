@@ -35,14 +35,6 @@
             font-style: italic;
         }
 
-        
-
-        
-
-        
-
-        
-
         * {
             margin: 0;
             padding: 0;
@@ -273,27 +265,30 @@
             zweifach: {
                 name: 'Zweifach Award',
                 file: 'Template_Zweifach_2025.svg',
-                fields: {
-                    'Awardee Name': { fontSize: '30pt', fontWeight: 'bold' },
-                    'Year': { fontSize: '30pt', fontWeight: 'bold', fontStyle: 'italic' }
-                }
+                replacements: [
+                    { find: 'Awardee M. Name, PhD', field: 'awardeeName' },
+                    { find: '####', field: 'year' }
+                ]
             },
             landis: {
                 name: 'Landis Award',
                 file: 'Template_Landis2025.svg',
-                fields: {
-                    'Awardee Name': { fontSize: '20pt', fontWeight: 'bold' },
-                    'Year': { fontSize: '20pt', fontWeight: 'normal' }
-                }
+                replacements: [
+                    { find: 'Awardee Name', field: 'awardeeName' },
+                    { find: '####', field: 'year' },
+                    { find: 'YYYY', field: 'year' }
+                ]
             },
             president: {
                 name: 'Past President Award',
                 file: 'Template_PastPresident2025.svg',
-                fields: {
-                    'Awardee Name': { fontSize: '30pt', fontWeight: 'bold' },
-                    'Start Year': { fontSize: '30pt', fontWeight: 'normal' },
-                    'End Year': { fontSize: '25pt', fontWeight: 'normal' }
-                }
+                replacements: [
+                    { find: 'Awardee Name', field: 'awardeeName' },
+                    { find: 'Start Year', field: 'startYear' },
+                    { find: 'End Year', field: 'endYear' },
+                    { find: 'XXXX', field: 'startYear' },
+                    { find: 'YYYY', field: 'endYear' }
+                ]
             }
         };
 
@@ -332,76 +327,80 @@
                 return;
             }
 
-            // Parse the SVG
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(templates[currentTemplate], 'image/svg+xml');
-            const svgElement = svgDoc.documentElement;
+            console.log('Updating preview for template:', currentTemplate);
 
-            // Get field values with smart defaults
-            const fields = {
-                'Awardee Name': document.getElementById('awardeeName').value || 'Awardee Name',
-                'Year': document.getElementById('year').value || String(currentYear),
-                'Start Year': document.getElementById('startYear').value || String(currentYear - 2),
-                'End Year': document.getElementById('endYear').value || String(currentYear)
+            // Start with the original template
+            let svgContent = templates[currentTemplate];
+            
+            // Get field values
+            const fieldValues = {
+                awardeeName: document.getElementById('awardeeName').value || 'Recipient Name',
+                year: document.getElementById('year').value || String(currentYear),
+                startYear: document.getElementById('startYear').value || String(currentYear - 2),
+                endYear: document.getElementById('endYear').value || String(currentYear)
             };
 
-            // Update text elements by ID
-            for (const [fieldName, value] of Object.entries(fields)) {
-                let element = null;
-                
-                // Search for elements with IDs containing the field name
-                const allElements = svgElement.getElementsByTagName('*');
-                for (let el of allElements) {
-                    if (el.id) {
-                        // Check if ID contains the field name (with underscores)
-                        const fieldId = fieldName.replace(' ', '_');
-                        if (el.id === fieldName || 
-                            el.id === fieldId ||
-                            el.id.startsWith(fieldId + '_') ||
-                            el.id.startsWith('Awardee_Name') && fieldName === 'Awardee Name' ||
-                            el.id === 'Year' && fieldName === 'Year' ||
-                            el.id === 'Start_Year' && fieldName === 'Start Year' ||
-                            el.id === 'End_Year' && fieldName === 'End Year') {
-                            element = el;
-                            break;
-                        }
-                    }
-                }
-                
-                // Also check text content for placeholders
-                if (!element) {
-                    const textElements = svgElement.getElementsByTagName('text');
-                    for (let textEl of textElements) {
-                        const content = textEl.textContent.trim();
-                        if ((content === 'Awardee M. Name, PhD' || content === 'Awardee Name') && fieldName === 'Awardee Name') {
-                            element = textEl;
-                            break;
-                        }
-                        if ((content === '####' || content === 'XXXX' || content === '2025') && fieldName === 'Year') {
-                            element = textEl;
-                            break;
-                        }
-                    }
-                }
+            console.log('Field values:', fieldValues);
 
-                if (element) {
-                    element.textContent = value;
-                    
-                    // Apply font styles from config
-                    const config = templateConfig[currentTemplate].fields[fieldName];
-                    if (config) {
-                        if (config.fontSize) element.style.fontSize = config.fontSize;
-                        if (config.fontWeight) element.style.fontWeight = config.fontWeight;
-                        if (config.fontStyle) element.style.fontStyle = config.fontStyle;
-                    }
+            // Parse SVG to update specific elements
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+            const svgElement = svgDoc.documentElement;
+
+            // Method 1: Find by ID and update
+            const yearElement = svgElement.getElementById('Year');
+            if (yearElement) {
+                console.log('Found Year element by ID, updating to:', fieldValues.year);
+                yearElement.textContent = fieldValues.year;
+            }
+
+            // Method 2: Find all text elements and update by content
+            const textElements = svgElement.getElementsByTagName('text');
+            for (let textEl of textElements) {
+                const content = textEl.textContent.trim();
+                
+                // Check for Awardee Name
+                if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
+                    console.log('Found name placeholder, updating to:', fieldValues.awardeeName);
+                    textEl.textContent = fieldValues.awardeeName;
+                }
+                
+                // Check for Year
+                if (content === '####') {
+                    console.log('Found #### placeholder, updating to:', fieldValues.year);
+                    textEl.textContent = fieldValues.year;
+                }
+                
+                // Check for Start/End Year
+                if (content === 'XXXX' || content === 'Start Year') {
+                    console.log('Found start year placeholder, updating to:', fieldValues.startYear);
+                    textEl.textContent = fieldValues.startYear;
+                }
+                
+                if (content === 'YYYY' || content === 'End Year') {
+                    console.log('Found end year placeholder, updating to:', fieldValues.endYear);
+                    textEl.textContent = fieldValues.endYear;
                 }
             }
 
-            // Update the preview
+            // Method 3: Also check elements with specific IDs containing the field names
+            const allElements = svgElement.getElementsByTagName('*');
+            for (let el of allElements) {
+                if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
+                    console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
+                    el.textContent = fieldValues.awardeeName;
+                }
+            }
+
+            // Serialize back to string
             currentSVG = new XMLSerializer().serializeToString(svgElement);
+            
+            // Update the preview
             const previewDiv = document.getElementById('preview');
             previewDiv.innerHTML = currentSVG;
             previewDiv.classList.remove('hidden');
+            
+            console.log('Preview updated');
         }
 
         // Handle template selection
@@ -452,40 +451,82 @@
             }
 
             try {
+                console.log('Starting PNG download...');
+                
+                // Get the SVG element dimensions
+                const svgElement = document.querySelector('#preview svg');
+                const bbox = svgElement.getBBox();
+                const viewBox = svgElement.getAttribute('viewBox');
+                let width = 504;  // Default from template
+                let height = 648; // Default from template
+                
+                if (viewBox) {
+                    const parts = viewBox.split(' ');
+                    width = parseFloat(parts[2]);
+                    height = parseFloat(parts[3]);
+                }
+                
+                console.log(`SVG dimensions: ${width}x${height}`);
+                
                 // Create a canvas
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Create an image from the SVG
+                // Set canvas size for high resolution (3x)
+                const scale = 3;
+                canvas.width = width * scale;
+                canvas.height = height * scale;
+                
+                // Create blob from SVG
+                const svgBlob = new Blob([currentSVG], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                // Create image and draw to canvas
                 const img = new Image();
-                const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
-                const url = URL.createObjectURL(blob);
                 
                 img.onload = function() {
-                    // Set canvas size for high resolution (3x)
-                    const scale = 3;
-                    canvas.width = img.width * scale;
-                    canvas.height = img.height * scale;
+                    console.log('Image loaded, drawing to canvas...');
+                    
+                    // Scale the context
                     ctx.scale(scale, scale);
                     
-                    // Draw white background
+                    // White background
                     ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, img.width, img.height);
+                    ctx.fillRect(0, 0, width, height);
                     
                     // Draw the image
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    ctx.drawImage(img, 0, 0, width, height);
                     
                     // Convert to blob and download
                     canvas.toBlob(function(blob) {
-                        const a = document.createElement('a');
-                        a.href = URL.createObjectURL(blob);
-                        a.download = `certificate_${currentTemplate}_${Date.now()}.png`;
-                        a.click();
-                        showStatus('Certificate downloaded successfully!', 'success');
+                        if (blob) {
+                            console.log('Blob created, downloading...');
+                            const downloadUrl = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = downloadUrl;
+                            a.download = `certificate_${currentTemplate}_${Date.now()}.png`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(downloadUrl);
+                            showStatus('Certificate downloaded successfully!', 'success');
+                        } else {
+                            console.error('Failed to create blob');
+                            showStatus('Error creating image. Please try again.', 'error');
+                        }
                     }, 'image/png', 1.0);
+                    
+                    URL.revokeObjectURL(url);
+                };
+                
+                img.onerror = function(e) {
+                    console.error('Error loading image:', e);
+                    showStatus('Error loading image. Please try again.', 'error');
+                    URL.revokeObjectURL(url);
                 };
                 
                 img.src = url;
+                
             } catch (error) {
                 console.error('Error generating PNG:', error);
                 showStatus('Error generating PNG. Please try again.', 'error');
@@ -499,12 +540,15 @@
                 return;
             }
 
-            const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
+            console.log('Downloading SVG...');
+            const blob = new Blob([currentSVG], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = `certificate_${currentTemplate}_${Date.now()}.svg`;
+            document.body.appendChild(a);
             a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
             showStatus('SVG certificate downloaded successfully!', 'success');
         }
@@ -524,7 +568,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
                     .then(registration => console.log('ServiceWorker registered'))
-                    .catch(err => console.log('ServiceWorker registration failed'));
+                    .catch(err => console.log('ServiceWorker registration failed:', err));
             });
         }
 
