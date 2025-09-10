@@ -321,7 +321,17 @@
                     }
                     
                     // Find and center the awardee name element
-                    const awardeeElement = svgElement.getElementById('Awardee Name');
+                    let awardeeElement = svgElement.getElementById('Awardee_Name');
+                    if (!awardeeElement) {
+                        // Try finding by complex ID pattern
+                        const allElements = svgElement.getElementsByTagName('text');
+                        for (let el of allElements) {
+                            if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
+                                awardeeElement = el;
+                                break;
+                            }
+                        }
+                    }
                     if (awardeeElement) {
                         // Move to template center
                         const transform = awardeeElement.getAttribute('transform');
@@ -381,32 +391,56 @@
             const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
-            // Simplified approach using clean layer names
+            // Find and update elements using correct IDs
             
-            // Update Awardee Name
-            const awardeeElement = svgElement.getElementById('Awardee Name');
+            // Update Awardee Name - try both simple and complex IDs
+            let awardeeElement = svgElement.getElementById('Awardee_Name');
+            if (!awardeeElement) {
+                // Try finding by complex ID pattern
+                const allElements = svgElement.getElementsByTagName('text');
+                for (let el of allElements) {
+                    if (el.id && el.id.includes('Awardee_Name')) {
+                        awardeeElement = el;
+                        break;
+                    }
+                }
+            }
             if (awardeeElement) {
                 console.log('Found Awardee Name element, updating to:', fieldValues.awardeeName);
                 awardeeElement.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
+            } else {
+                console.log('❌ Could not find Awardee Name element');
             }
             
-            // Update Year (for Zweifach and Landis)
-            const yearElement = svgElement.getElementById('Year');
+            // Update Year - try both simple and complex IDs
+            let yearElement = svgElement.getElementById('Year');
+            if (!yearElement) {
+                // Try finding by complex ID pattern
+                const allElements = svgElement.getElementsByTagName('text');
+                for (let el of allElements) {
+                    if (el.id && el.id.includes('Year_') && el.textContent.trim() === '####') {
+                        yearElement = el;
+                        break;
+                    }
+                }
+            }
             if (yearElement) {
                 console.log('Found Year element, updating to:', fieldValues.year);
                 yearElement.textContent = fieldValues.year;
+            } else {
+                console.log('❌ Could not find Year element');
             }
             
             // Update Start Year and End Year (for Past President)
-            const startYearElement = svgElement.getElementById('Start Year');
+            const startYearElement = svgElement.getElementById('Start_Year');
             if (startYearElement) {
-                console.log('Found Start Year element, updating to:', fieldValues.startYear);
+                console.log('Found Start_Year element, updating to:', fieldValues.startYear);
                 startYearElement.textContent = fieldValues.startYear;
             }
             
-            const endYearElement = svgElement.getElementById('End Year');
+            const endYearElement = svgElement.getElementById('End_Year');
             if (endYearElement) {
-                console.log('Found End Year element, updating to:', fieldValues.endYear);
+                console.log('Found End_Year element, updating to:', fieldValues.endYear);
                 endYearElement.textContent = fieldValues.endYear;
             }
 
