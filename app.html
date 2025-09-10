@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Award Certificate Maker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a472a">
+    <style>
+        @font-face {
+            font-family: 'Adobe Garamond Pro';
+            src: url('AGaramondPro-Regular.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Adobe Garamond Pro';
+            src: url('AGaramondPro-Bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        @font-face {
+            font-family: 'Adobe Garamond Pro';
+            src: url('AGaramondPro-Italic.otf') format('opentype');
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        @font-face {
+            font-family: 'Adobe Garamond Pro';
+            src: url('AGaramondPro-BoldItalic.otf') format('opentype');
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .preview-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 600px;
+        }
+
+        #preview {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #d0d0d0;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Award Certificate Maker</h1>
+        
+        <div class="controls">
+            <div class="inputs">
+                <div class="form-group">
+                    <label for="template">Certificate Template</label>
+                    <select id="template">
+                        <option value="">Loading templates...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="awardeeName">Awardee Name</label>
+                    <input type="text" id="awardeeName" placeholder="Enter recipient's name">
+                </div>
+
+                <div class="form-group" id="yearGroup">
+                    <label for="year">Year</label>
+                    <input type="text" id="year" placeholder="2025">
+                </div>
+
+                <div class="form-group hidden" id="startYearGroup">
+                    <label for="startYear">Start Year</label>
+                    <input type="text" id="startYear" placeholder="2024">
+                </div>
+
+                <div class="form-group hidden" id="endYearGroup">
+                    <label for="endYear">End Year</label>
+                    <input type="text" id="endYear" placeholder="2025">
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <div id="preview-wrapper" style="width: 100%;">
+                    <div id="loading" class="loading">Loading templates...</div>
+                    <div id="preview" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-primary" id="downloadPNG" onclick="downloadPNG()" disabled>Download PNG</button>
+            <button class="btn-secondary" id="downloadSVG" onclick="downloadSVG()" disabled>Download SVG</button>
+        </div>
+
+        <div id="status" class="status hidden"></div>
+    </div>
+
+    <script>
+        // Template configuration
+        const templateConfig = {
+            zweifach: {
+                name: 'Zweifach Award',
+                file: 'Template_Zweifach_2025.svg',
+                fields: {
+                    'Awardee Name': { fontSize: '30pt', fontWeight: 'bold' },
+                    'Year': { fontSize: '30pt', fontWeight: 'bold', fontStyle: 'italic' }
+                }
+            },
+            landis: {
+                name: 'Landis Award',
+                file: 'Template_Landis2025.svg',
+                fields: {
+                    'Awardee Name': { fontSize: '20pt', fontWeight: 'bold' },
+                    'Year': { fontSize: '20pt', fontWeight: 'normal' }
+                }
+            },
+            president: {
+                name: 'Past President Award',
+                file: 'Template_PastPresident2025.svg',
+                fields: {
+                    'Awardee Name': { fontSize: '30pt', fontWeight: 'bold' },
+                    'Start Year': { fontSize: '30pt', fontWeight: 'normal' },
+                    'End Year': { fontSize: '25pt', fontWeight: 'normal' }
+                }
+            }
+        };
+
+        let currentTemplate = null;
+        let currentSVG = null;
+        let templates = {};
+
+        // Load all templates on page load
+        async function loadTemplates() {
+            const select = document.getElementById('template');
+            select.innerHTML = '<option value="">Select a template...</option>';
+            
+            for (const [key, config] of Object.entries(templateConfig)) {
+                try {
+                    const response = await fetch(config.file);
+                    const svgText = await response.text();
+                    templates[key] = svgText;
+                    
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = config.name;
+                    select.appendChild(option);
+                } catch (error) {
+                    console.error(`Failed to load ${config.file}:`, error);
+                }
+            }
+            
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('downloadPNG').disabled = false;
+            document.getElementById('downloadSVG').disabled = false;
+        }
+
+        // Update preview when template or inputs change
+        function updatePreview() {
+            if (!currentTemplate || !templates[currentTemplate]) {
+                return;
+            }
+
+            // Parse the SVG
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(templates[currentTemplate], 'image/svg+xml');
+            const svgElement = svgDoc.documentElement;
+
+            // Get field values
+            const fields = {
+                'Awardee Name': document.getElementById('awardeeName').value || 'Awardee Name',
+                'Year': document.getElementById('year').value || '2025',
+                'Start Year': document.getElementById('startYear').value || '2024',
+                'End Year': document.getElementById('endYear').value || '2025'
+            };
+
+            // Update text elements by ID
+            for (const [fieldName, value] of Object.entries(fields)) {
+                // Try to find element by exact ID match
+                let element = svgElement.getElementById(fieldName);
+                
+                // If not found, try searching for text elements containing the field name
+                if (!element) {
+                    const textElements = svgElement.getElementsByTagName('text');
+                    for (let textEl of textElements) {
+                        if (textEl.textContent === fieldName || 
+                            textEl.textContent === '####' || 
+                            textEl.textContent === 'XXXX' ||
+                            textEl.id === fieldName.replace(' ', '_')) {
+                            element = textEl;
+                            break;
+                        }
+                    }
+                }
+
+                if (element) {
+                    element.textContent = value;
+                    
+                    // Apply font styles from config
+                    const config = templateConfig[currentTemplate].fields[fieldName];
+                    if (config) {
+                        if (config.fontSize) element.style.fontSize = config.fontSize;
+                        if (config.fontWeight) element.style.fontWeight = config.fontWeight;
+                        if (config.fontStyle) element.style.fontStyle = config.fontStyle;
+                    }
+                }
+            }
+
+            // Update the preview
+            currentSVG = new XMLSerializer().serializeToString(svgElement);
+            const previewDiv = document.getElementById('preview');
+            previewDiv.innerHTML = currentSVG;
+            previewDiv.classList.remove('hidden');
+        }
+
+        // Handle template selection
+        document.getElementById('template').addEventListener('change', function() {
+            currentTemplate = this.value;
+            
+            if (!currentTemplate) {
+                document.getElementById('preview').classList.add('hidden');
+                return;
+            }
+
+            // Show/hide relevant fields
+            document.getElementById('yearGroup').classList.add('hidden');
+            document.getElementById('startYearGroup').classList.add('hidden');
+            document.getElementById('endYearGroup').classList.add('hidden');
+            
+            if (currentTemplate === 'president') {
+                document.getElementById('startYearGroup').classList.remove('hidden');
+                document.getElementById('endYearGroup').classList.remove('hidden');
+            } else {
+                document.getElementById('yearGroup').classList.remove('hidden');
+            }
+            
+            updatePreview();
+        });
+
+        // Update preview on input changes
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Download as PNG
+        async function downloadPNG() {
+            if (!currentSVG) {
+                showStatus('Please select a template first', 'error');
+                return;
+            }
+
+            try {
+                // Create a canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Create an image from the SVG
+                const img = new Image();
+                const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                
+                img.onload = function() {
+                    // Set canvas size for high resolution (3x)
+                    const scale = 3;
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    ctx.scale(scale, scale);
+                    
+                    // Draw white background
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, img.width, img.height);
+                    
+                    // Draw the image
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    
+                    // Convert to blob and download
+                    canvas.toBlob(function(blob) {
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `certificate_${currentTemplate}_${Date.now()}.png`;
+                        a.click();
+                        showStatus('Certificate downloaded successfully!', 'success');
+                    }, 'image/png', 1.0);
+                };
+                
+                img.src = url;
+            } catch (error) {
+                console.error('Error generating PNG:', error);
+                showStatus('Error generating PNG. Please try again.', 'error');
+            }
+        }
+
+        // Download as SVG
+        function downloadSVG() {
+            if (!currentSVG) {
+                showStatus('Please select a template first', 'error');
+                return;
+            }
+
+            const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `certificate_${currentTemplate}_${Date.now()}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showStatus('SVG certificate downloaded successfully!', 'success');
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            setTimeout(() => {
+                status.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed'));
+            });
+        }
+
+        // Initialize
+        loadTemplates();
+    </script>
+</body>
+</html>

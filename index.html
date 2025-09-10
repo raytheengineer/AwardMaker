@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Award Certificate Maker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a472a">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @font-face {
+            font-family: 'Garamond Fallback';
+            src: local('Garamond'), local('Adobe Garamond Pro'), local('EB Garamond'), local('Cormorant Garamond'), local('Georgia');
+            font-weight: normal;
+        }
+
+        @font-face {
+            font-family: 'Garamond Fallback';
+            src: local('Adobe Garamond Pro Bold'), local('EB Garamond Bold'), local('Cormorant Garamond Bold'), local('Georgia Bold');
+            font-weight: bold;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input {
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .preview-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #preview {
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Award Certificate Maker</h1>
+        
+        <div class="controls">
+            <div class="inputs">
+                <div class="form-group">
+                    <label for="template">Certificate Template</label>
+                    <select id="template">
+                        <option value="zweifach">Zweifach Award</option>
+                        <option value="landis">Landis Award</option>
+                        <option value="president">Past President Award</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="awardeeName">Awardee Name</label>
+                    <input type="text" id="awardeeName" placeholder="Enter recipient's name">
+                </div>
+
+                <div class="form-group" id="yearGroup">
+                    <label for="year">Year</label>
+                    <input type="text" id="year" placeholder="2024">
+                </div>
+
+                <div class="form-group hidden" id="startYearGroup">
+                    <label for="startYear">Start Year</label>
+                    <input type="text" id="startYear" placeholder="2023">
+                </div>
+
+                <div class="form-group hidden" id="endYearGroup">
+                    <label for="endYear">End Year</label>
+                    <input type="text" id="endYear" placeholder="2024">
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <svg id="preview" viewBox="0 0 1100 850" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Certificate content will be generated here -->
+                </svg>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-primary" onclick="downloadPNG()">Download PNG</button>
+            <button class="btn-secondary" onclick="downloadSVG()">Download SVG</button>
+        </div>
+
+        <div id="status" class="status hidden"></div>
+    </div>
+
+    <script>
+        // Certificate templates
+        const templates = {
+            zweifach: {
+                name: 'Zweifach Award',
+                fields: ['awardeeName', 'year'],
+                generate: (data) => `
+                    <rect width="1100" height="850" fill="#fdfdf8"/>
+                    <rect x="50" y="50" width="1000" height="750" fill="none" stroke="#8b7355" stroke-width="3"/>
+                    <rect x="70" y="70" width="960" height="710" fill="none" stroke="#8b7355" stroke-width="1"/>
+                    
+                    <text x="550" y="150" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="48" fill="#1a472a">
+                        The Zweifach Award
+                    </text>
+                    
+                    <text x="550" y="220" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="28" fill="#1a472a">
+                        is presented to
+                    </text>
+                    
+                    <text x="550" y="350" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="30" font-weight="bold" fill="#1a472a">
+                        ${data.awardeeName || 'Recipient Name'}
+                    </text>
+                    
+                    <line x1="350" y1="380" x2="750" y2="380" stroke="#8b7355" stroke-width="1"/>
+                    
+                    <text x="550" y="480" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="24" fill="#1a472a">
+                        in recognition of outstanding achievement
+                    </text>
+                    
+                    <text x="550" y="520" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="24" fill="#1a472a">
+                        and exceptional service
+                    </text>
+                    
+                    <text x="550" y="650" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="30" font-style="italic" font-weight="bold" fill="#1a472a">
+                        ${data.year || '2024'}
+                    </text>
+                    
+                    <line x1="200" y1="720" x2="400" y2="720" stroke="#8b7355" stroke-width="1"/>
+                    <text x="300" y="745" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="16" fill="#1a472a">
+                        Director
+                    </text>
+                    
+                    <line x1="700" y1="720" x2="900" y2="720" stroke="#8b7355" stroke-width="1"/>
+                    <text x="800" y="745" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="16" fill="#1a472a">
+                        President
+                    </text>
+                `
+            },
+            landis: {
+                name: 'Landis Award',
+                fields: ['awardeeName', 'year'],
+                generate: (data) => `
+                    <rect width="1100" height="850" fill="#fdfdf8"/>
+                    <rect x="50" y="50" width="1000" height="750" fill="none" stroke="#2c5282" stroke-width="3"/>
+                    
+                    <text x="550" y="150" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="48" fill="#2c5282">
+                        The Landis Award
+                    </text>
+                    
+                    <text x="550" y="220" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="28" fill="#2c5282">
+                        for Excellence in Leadership
+                    </text>
+                    
+                    <text x="550" y="280" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="24" fill="#2c5282">
+                        is hereby awarded to
+                    </text>
+                    
+                    <text x="550" y="380" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="20" font-weight="bold" fill="#2c5282">
+                        ${data.awardeeName || 'Recipient Name'}
+                    </text>
+                    
+                    <line x1="350" y1="410" x2="750" y2="410" stroke="#2c5282" stroke-width="1"/>
+                    
+                    <text x="550" y="500" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="22" fill="#2c5282">
+                        who has demonstrated exceptional dedication,
+                    </text>
+                    
+                    <text x="550" y="540" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="22" fill="#2c5282">
+                        outstanding leadership, and remarkable contributions
+                    </text>
+                    
+                    <text x="550" y="580" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="22" fill="#2c5282">
+                        to our organization
+                    </text>
+                    
+                    <text x="550" y="680" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="20" fill="#2c5282">
+                        ${data.year || '2024'}
+                    </text>
+                    
+                    <line x1="200" y1="720" x2="400" y2="720" stroke="#2c5282" stroke-width="1"/>
+                    <text x="300" y="745" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="16" fill="#2c5282">
+                        Committee Chair
+                    </text>
+                    
+                    <line x1="700" y1="720" x2="900" y2="720" stroke="#2c5282" stroke-width="1"/>
+                    <text x="800" y="745" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="16" fill="#2c5282">
+                        Executive Director
+                    </text>
+                `
+            },
+            president: {
+                name: 'Past President Award',
+                fields: ['awardeeName', 'startYear', 'endYear'],
+                generate: (data) => `
+                    <rect width="1100" height="850" fill="#fdfdf8"/>
+                    <rect x="50" y="50" width="1000" height="750" fill="none" stroke="#6b1420" stroke-width="3"/>
+                    <rect x="70" y="70" width="960" height="710" fill="none" stroke="#6b1420" stroke-width="1"/>
+                    
+                    <text x="550" y="150" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="48" fill="#6b1420">
+                        Certificate of Appreciation
+                    </text>
+                    
+                    <text x="550" y="220" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="28" fill="#6b1420">
+                        presented to
+                    </text>
+                    
+                    <text x="550" y="320" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="30" font-weight="bold" fill="#6b1420">
+                        ${data.awardeeName || 'Past President Name'}
+                    </text>
+                    
+                    <line x1="300" y1="350" x2="800" y2="350" stroke="#6b1420" stroke-width="2"/>
+                    
+                    <text x="550" y="430" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="24" fill="#6b1420">
+                        in grateful recognition of distinguished service
+                    </text>
+                    
+                    <text x="550" y="470" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="24" fill="#6b1420">
+                        as President of our organization
+                    </text>
+                    
+                    <text x="550" y="560" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="30" fill="#6b1420">
+                        ${data.startYear || '2023'}
+                    </text>
+                    
+                    <text x="550" y="600" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="20" fill="#6b1420">
+                        to
+                    </text>
+                    
+                    <text x="550" y="640" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="25" fill="#6b1420">
+                        ${data.endYear || '2024'}
+                    </text>
+                    
+                    <text x="550" y="720" text-anchor="middle" font-family="Garamond Fallback, Georgia, serif" font-size="18" font-style="italic" fill="#6b1420">
+                        With sincere appreciation and best wishes
+                    </text>
+                `
+            }
+        };
+
+        // Update preview when inputs change
+        function updatePreview() {
+            const template = document.getElementById('template').value;
+            const data = {
+                awardeeName: document.getElementById('awardeeName').value,
+                year: document.getElementById('year').value,
+                startYear: document.getElementById('startYear').value,
+                endYear: document.getElementById('endYear').value
+            };
+            
+            const svg = document.getElementById('preview');
+            svg.innerHTML = templates[template].generate(data);
+        }
+
+        // Handle template selection
+        document.getElementById('template').addEventListener('change', function() {
+            const template = this.value;
+            
+            // Hide all year fields
+            document.getElementById('yearGroup').classList.add('hidden');
+            document.getElementById('startYearGroup').classList.add('hidden');
+            document.getElementById('endYearGroup').classList.add('hidden');
+            
+            // Show relevant fields
+            if (template === 'president') {
+                document.getElementById('startYearGroup').classList.remove('hidden');
+                document.getElementById('endYearGroup').classList.remove('hidden');
+            } else {
+                document.getElementById('yearGroup').classList.remove('hidden');
+            }
+            
+            updatePreview();
+        });
+
+        // Update preview on input changes
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Download as PNG
+        function downloadPNG() {
+            const svg = document.getElementById('preview');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            // High resolution
+            const scale = 3;
+            canvas.width = 1100 * scale;
+            canvas.height = 850 * scale;
+            
+            img.onload = function() {
+                ctx.scale(scale, scale);
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `certificate_${Date.now()}.png`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showStatus('Certificate downloaded successfully!', 'success');
+                }, 'image/png');
+            };
+            
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        }
+
+        // Download as SVG
+        function downloadSVG() {
+            const svg = document.getElementById('preview');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `certificate_${Date.now()}.svg`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showStatus('SVG certificate downloaded successfully!', 'success');
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            setTimeout(() => {
+                status.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize
+        updatePreview();
+
+        // Register service worker for offline support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>
