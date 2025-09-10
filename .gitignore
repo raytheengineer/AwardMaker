@@ -1,0 +1,13 @@
+# Adobe Garamond Pro font files (licensed)
+*.otf
+*.ttf
+AGaramondPro-*
+
+# Temporary files
+.DS_Store
+*.tmp
+*.bak
+
+# Local development files
+encode-fonts.py
+convert-fonts.html
