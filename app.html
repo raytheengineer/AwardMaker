@@ -311,23 +311,30 @@
                     const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
                     const svgElement = svgDoc.documentElement;
                     
-                    // Find and modify awardee name elements
-                    const textElements = svgElement.getElementsByTagName('text');
-                    for (let textEl of textElements) {
-                        const content = textEl.textContent.trim();
-                        if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
-                            textEl.setAttribute('text-anchor', 'middle');
-                            console.log(`Set text-anchor=middle for: "${content}" in ${key} template`);
-                        }
+                    // Get template center from viewBox
+                    const viewBox = svgElement.getAttribute('viewBox');
+                    let templateCenterX = 252; // Default
+                    if (viewBox) {
+                        const parts = viewBox.split(' ');
+                        const width = parseFloat(parts[2]);
+                        templateCenterX = width / 2;
                     }
                     
-                    // Also check elements by ID
-                    const allElements = svgElement.getElementsByTagName('*');
-                    for (let el of allElements) {
-                        if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
-                            el.setAttribute('text-anchor', 'middle');
-                            console.log(`Set text-anchor=middle for ID: ${el.id} in ${key} template`);
+                    // Find and center the awardee name element
+                    const awardeeElement = svgElement.getElementById('Awardee Name');
+                    if (awardeeElement) {
+                        // Move to template center
+                        const transform = awardeeElement.getAttribute('transform');
+                        if (transform && transform.includes('matrix')) {
+                            // Update X position in matrix to template center
+                            const newTransform = transform.replace(/matrix\(([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^)]+)\)/, 
+                                `matrix($1,$2,$3,$4,${templateCenterX},$6)`);
+                            awardeeElement.setAttribute('transform', newTransform);
+                        } else {
+                            awardeeElement.setAttribute('x', templateCenterX);
                         }
+                        awardeeElement.setAttribute('text-anchor', 'middle');
+                        console.log(`Centered Awardee Name in ${key} at X=${templateCenterX}`);
                     }
                     
                     // Serialize back to string
@@ -374,76 +381,33 @@
             const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
-            // Method 1: Find year elements by ID and update
+            // Simplified approach using clean layer names
+            
+            // Update Awardee Name
+            const awardeeElement = svgElement.getElementById('Awardee Name');
+            if (awardeeElement) {
+                console.log('Found Awardee Name element, updating to:', fieldValues.awardeeName);
+                awardeeElement.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
+            }
+            
+            // Update Year (for Zweifach and Landis)
             const yearElement = svgElement.getElementById('Year');
             if (yearElement) {
-                console.log('Found Year element by ID, updating to:', fieldValues.year);
+                console.log('Found Year element, updating to:', fieldValues.year);
                 yearElement.textContent = fieldValues.year;
             }
             
-            const startYearElement = svgElement.getElementById('Start_Year');
+            // Update Start Year and End Year (for Past President)
+            const startYearElement = svgElement.getElementById('Start Year');
             if (startYearElement) {
-                console.log('Found Start_Year element by ID, updating to:', fieldValues.startYear);
+                console.log('Found Start Year element, updating to:', fieldValues.startYear);
                 startYearElement.textContent = fieldValues.startYear;
             }
             
-            const endYearElement = svgElement.getElementById('End_Year');
+            const endYearElement = svgElement.getElementById('End Year');
             if (endYearElement) {
-                console.log('Found End_Year element by ID, updating to:', fieldValues.endYear);
+                console.log('Found End Year element, updating to:', fieldValues.endYear);
                 endYearElement.textContent = fieldValues.endYear;
-            }
-
-            // Method 2: Find all text elements and update by content
-            const textElements = svgElement.getElementsByTagName('text');
-            for (let textEl of textElements) {
-                const content = textEl.textContent.trim();
-                
-                // Check for Awardee Name
-                if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
-                    console.log('Found name placeholder, updating to:', fieldValues.awardeeName);
-                    
-                    // Simply replace the text content, keeping original positioning
-                    // The template text "Awardee M. Name, PhD" is already positioned correctly
-                    textEl.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
-                    
-                    console.log('Replaced name text while preserving original position');
-                }
-                
-                // Check for Year
-                if (content === '####') {
-                    console.log('Found #### placeholder, updating to:', fieldValues.year);
-                    textEl.textContent = fieldValues.year;
-                }
-                
-                // Check for Start/End Year
-                if (content === 'XXXX' || content === 'Start Year') {
-                    console.log('Found start year placeholder, updating to:', fieldValues.startYear);
-                    textEl.textContent = fieldValues.startYear;
-                }
-                
-                if (content === 'YYYY' || content === 'End Year') {
-                    console.log('Found end year placeholder, updating to:', fieldValues.endYear);
-                    textEl.textContent = fieldValues.endYear;
-                }
-            }
-
-            // Method 3: Also check elements with specific IDs containing the field names
-            const allElements = svgElement.getElementsByTagName('*');
-            for (let el of allElements) {
-                if (el.tagName === 'text' && el.id) {
-                    // Handle Awardee Name elements
-                    if (el.id.includes('Awardee_Name')) {
-                        console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
-                        el.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
-                        console.log('Replaced name text (by ID) while preserving original position');
-                    }
-                    
-                    // Handle Year elements with complex IDs (like Year_00000...)
-                    if (el.id.includes('Year_') && el.textContent.trim() === '####') {
-                        console.log('Found Year element with complex ID, updating to:', fieldValues.year);
-                        el.textContent = fieldValues.year;
-                    }
-                }
             }
 
             // Serialize back to string
