@@ -304,7 +304,34 @@
             for (const [key, config] of Object.entries(templateConfig)) {
                 try {
                     const response = await fetch(config.file);
-                    const svgText = await response.text();
+                    let svgText = await response.text();
+                    
+                    // Pre-process the template to set text-anchor to middle for awardee names
+                    const parser = new DOMParser();
+                    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+                    const svgElement = svgDoc.documentElement;
+                    
+                    // Find and modify awardee name elements
+                    const textElements = svgElement.getElementsByTagName('text');
+                    for (let textEl of textElements) {
+                        const content = textEl.textContent.trim();
+                        if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
+                            textEl.setAttribute('text-anchor', 'middle');
+                            console.log(`Set text-anchor=middle for: "${content}" in ${key} template`);
+                        }
+                    }
+                    
+                    // Also check elements by ID
+                    const allElements = svgElement.getElementsByTagName('*');
+                    for (let el of allElements) {
+                        if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
+                            el.setAttribute('text-anchor', 'middle');
+                            console.log(`Set text-anchor=middle for ID: ${el.id} in ${key} template`);
+                        }
+                    }
+                    
+                    // Serialize back to string
+                    svgText = new XMLSerializer().serializeToString(svgElement);
                     templates[key] = svgText;
                     
                     const option = document.createElement('option');
@@ -347,11 +374,23 @@
             const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
-            // Method 1: Find by ID and update
+            // Method 1: Find year elements by ID and update
             const yearElement = svgElement.getElementById('Year');
             if (yearElement) {
                 console.log('Found Year element by ID, updating to:', fieldValues.year);
                 yearElement.textContent = fieldValues.year;
+            }
+            
+            const startYearElement = svgElement.getElementById('Start_Year');
+            if (startYearElement) {
+                console.log('Found Start_Year element by ID, updating to:', fieldValues.startYear);
+                startYearElement.textContent = fieldValues.startYear;
+            }
+            
+            const endYearElement = svgElement.getElementById('End_Year');
+            if (endYearElement) {
+                console.log('Found End_Year element by ID, updating to:', fieldValues.endYear);
+                endYearElement.textContent = fieldValues.endYear;
             }
 
             // Method 2: Find all text elements and update by content
@@ -391,13 +430,19 @@
             // Method 3: Also check elements with specific IDs containing the field names
             const allElements = svgElement.getElementsByTagName('*');
             for (let el of allElements) {
-                if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
-                    console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
+                if (el.tagName === 'text' && el.id) {
+                    // Handle Awardee Name elements
+                    if (el.id.includes('Awardee_Name')) {
+                        console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
+                        el.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
+                        console.log('Replaced name text (by ID) while preserving original position');
+                    }
                     
-                    // Simply replace the text content, keeping original positioning
-                    el.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
-                    
-                    console.log('Replaced name text (by ID) while preserving original position');
+                    // Handle Year elements with complex IDs (like Year_00000...)
+                    if (el.id.includes('Year_') && el.textContent.trim() === '####') {
+                        console.log('Found Year element with complex ID, updating to:', fieldValues.year);
+                        el.textContent = fieldValues.year;
+                    }
                 }
             }
 
