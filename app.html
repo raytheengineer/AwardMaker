@@ -320,10 +320,21 @@
                         templateCenterX = width / 2;
                     }
                     
-                    // Find and center the awardee name element
-                    let awardeeElement = svgElement.getElementById('Awardee_Name');
+                    // Find and center the awardee name text element (not the group)
+                    let awardeeElement = null;
+                    
+                    // First try to find the group, then get the text element inside
+                    let awardeeGroup = svgElement.getElementById('Awardee_Name');
+                    if (awardeeGroup) {
+                        // Find the text element inside the group
+                        const textElements = awardeeGroup.getElementsByTagName('text');
+                        if (textElements.length > 0) {
+                            awardeeElement = textElements[0];
+                        }
+                    }
+                    
+                    // If still not found, try finding text elements with Awardee_Name in ID
                     if (!awardeeElement) {
-                        // Try finding by complex ID pattern
                         const allElements = svgElement.getElementsByTagName('text');
                         for (let el of allElements) {
                             if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
@@ -393,10 +404,21 @@
 
             // Find and update elements using correct IDs
             
-            // Update Awardee Name - try both simple and complex IDs
-            let awardeeElement = svgElement.getElementById('Awardee_Name');
+            // Update Awardee Name - find the text element, not the group
+            let awardeeElement = null;
+            
+            // First try to find the group, then get the text element inside
+            let awardeeGroup = svgElement.getElementById('Awardee_Name');
+            if (awardeeGroup) {
+                // Find the text element inside the group
+                const textElements = awardeeGroup.getElementsByTagName('text');
+                if (textElements.length > 0) {
+                    awardeeElement = textElements[0];
+                }
+            }
+            
+            // If still not found, try finding text elements with Awardee_Name in ID
             if (!awardeeElement) {
-                // Try finding by complex ID pattern
                 const allElements = svgElement.getElementsByTagName('text');
                 for (let el of allElements) {
                     if (el.id && el.id.includes('Awardee_Name')) {
@@ -405,11 +427,12 @@
                     }
                 }
             }
+            
             if (awardeeElement) {
-                console.log('Found Awardee Name element, updating to:', fieldValues.awardeeName);
+                console.log('Found Awardee Name text element, updating to:', fieldValues.awardeeName);
                 awardeeElement.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
             } else {
-                console.log('❌ Could not find Awardee Name element');
+                console.log('❌ Could not find Awardee Name text element');
             }
             
             // Update Year - try both simple and complex IDs
