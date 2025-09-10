@@ -362,7 +362,47 @@
                 // Check for Awardee Name
                 if (content === 'Awardee M. Name, PhD' || content === 'Awardee Name') {
                     console.log('Found name placeholder, updating to:', fieldValues.awardeeName);
+                    
+                    // Store original position and calculate center
+                    const originalTransform = textEl.getAttribute('transform');
+                    const originalX = textEl.getAttribute('x');
+                    
+                    // Calculate center based on template dimensions
+                    let centerX = 252; // Default
+                    
+                    // Template-specific centering based on actual viewBox
+                    if (currentTemplate === 'zweifach') {
+                        centerX = 252; // 504/2
+                    } else if (currentTemplate === 'landis') {
+                        centerX = 180; // 360/2
+                    } else if (currentTemplate === 'president') {
+                        centerX = 252; // 504/2
+                    }
+                    
+                    // If the element has a transform matrix, update it
+                    if (originalTransform && originalTransform.includes('matrix')) {
+                        // Extract the y position from the matrix
+                        const matrixMatch = originalTransform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,([^)]+)\)/);
+                        if (matrixMatch) {
+                            const yPos = matrixMatch[1];
+                            // Create new centered transform
+                            textEl.setAttribute('transform', `matrix(1 0 0 1 ${centerX} ${yPos})`);
+                        }
+                    } else if (originalX) {
+                        // If using x/y attributes, update x
+                        textEl.setAttribute('x', centerX);
+                    } else {
+                        // Fallback: set both
+                        textEl.setAttribute('x', centerX);
+                    }
+                    
+                    // Set text-anchor to middle for center alignment
+                    textEl.setAttribute('text-anchor', 'middle');
+                    
+                    // Update the text content
                     textEl.textContent = fieldValues.awardeeName;
+                    
+                    console.log(`Centered name at x:${centerX} with text-anchor:middle`);
                 }
                 
                 // Check for Year
@@ -388,7 +428,33 @@
             for (let el of allElements) {
                 if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
                     console.log('Found element with Awardee_Name in ID, updating to:', fieldValues.awardeeName);
+                    
+                    // Apply same centering logic
+                    const originalTransform = el.getAttribute('transform');
+                    let centerX = 252; // Default
+                    
+                    // Template-specific centering
+                    if (currentTemplate === 'zweifach') {
+                        centerX = 252; // 504/2
+                    } else if (currentTemplate === 'landis') {
+                        centerX = 180; // 360/2
+                    } else if (currentTemplate === 'president') {
+                        centerX = 252; // 504/2
+                    }
+                    
+                    if (originalTransform && originalTransform.includes('matrix')) {
+                        const matrixMatch = originalTransform.match(/matrix\([^,]+,[^,]+,[^,]+,[^,]+,[^,]+,([^)]+)\)/);
+                        if (matrixMatch) {
+                            const yPos = matrixMatch[1];
+                            el.setAttribute('transform', `matrix(1 0 0 1 ${centerX} ${yPos})`);
+                        }
+                    } else {
+                        el.setAttribute('x', centerX);
+                    }
+                    
+                    el.setAttribute('text-anchor', 'middle');
                     el.textContent = fieldValues.awardeeName;
+                    console.log(`Centered name (by ID) at x:${centerX}`);
                 }
             }
 
