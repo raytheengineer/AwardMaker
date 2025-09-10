@@ -60,29 +60,29 @@
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 1400px;
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 40px;
+            padding: 30px;
         }
 
         h1 {
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
-            font-size: 2.5em;
+            font-size: 2em;
         }
 
         .controls {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 40px;
-            margin-bottom: 30px;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
         }
 
         .inputs {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
         }
 
         .form-group {
@@ -100,10 +100,10 @@
         }
 
         select, input {
-            padding: 12px 15px;
+            padding: 10px 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.3s ease;
         }
 
@@ -116,16 +116,16 @@
         .preview-container {
             background: #f8f9fa;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 600px;
+            min-height: 400px;
         }
 
         #preview {
             width: 100%;
-            max-width: 900px;
+            max-width: 500px;
             height: auto;
             background: white;
             border-radius: 8px;
@@ -344,17 +344,37 @@
 
             // Update text elements by ID
             for (const [fieldName, value] of Object.entries(fields)) {
-                // Try to find element by exact ID match
-                let element = svgElement.getElementById(fieldName);
+                let element = null;
                 
-                // If not found, try searching for text elements containing the field name
+                // Search for elements with IDs containing the field name
+                const allElements = svgElement.getElementsByTagName('*');
+                for (let el of allElements) {
+                    if (el.id) {
+                        // Check if ID contains the field name (with underscores)
+                        const fieldId = fieldName.replace(' ', '_');
+                        if (el.id === fieldName || 
+                            el.id === fieldId ||
+                            el.id.startsWith(fieldId + '_') ||
+                            el.id.startsWith('Awardee_Name') && fieldName === 'Awardee Name' ||
+                            el.id === 'Year' && fieldName === 'Year' ||
+                            el.id === 'Start_Year' && fieldName === 'Start Year' ||
+                            el.id === 'End_Year' && fieldName === 'End Year') {
+                            element = el;
+                            break;
+                        }
+                    }
+                }
+                
+                // Also check text content for placeholders
                 if (!element) {
                     const textElements = svgElement.getElementsByTagName('text');
                     for (let textEl of textElements) {
-                        if (textEl.textContent === fieldName || 
-                            textEl.textContent === '####' || 
-                            textEl.textContent === 'XXXX' ||
-                            textEl.id === fieldName.replace(' ', '_')) {
+                        const content = textEl.textContent.trim();
+                        if ((content === 'Awardee M. Name, PhD' || content === 'Awardee Name') && fieldName === 'Awardee Name') {
+                            element = textEl;
+                            break;
+                        }
+                        if ((content === '####' || content === 'XXXX' || content === '2025') && fieldName === 'Year') {
                             element = textEl;
                             break;
                         }
