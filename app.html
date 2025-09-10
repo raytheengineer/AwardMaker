@@ -234,17 +234,17 @@
 
                 <div class="form-group" id="yearGroup">
                     <label for="year">Year</label>
-                    <input type="text" id="year" placeholder="2025">
+                    <input type="text" id="year" placeholder="Enter year">
                 </div>
 
                 <div class="form-group hidden" id="startYearGroup">
                     <label for="startYear">Start Year</label>
-                    <input type="text" id="startYear" placeholder="2024">
+                    <input type="text" id="startYear" placeholder="Enter start year">
                 </div>
 
                 <div class="form-group hidden" id="endYearGroup">
                     <label for="endYear">End Year</label>
-                    <input type="text" id="endYear" placeholder="2025">
+                    <input type="text" id="endYear" placeholder="Enter end year">
                 </div>
             </div>
 
@@ -265,6 +265,9 @@
     </div>
 
     <script>
+        // Get current year
+        const currentYear = new Date().getFullYear();
+        
         // Template configuration
         const templateConfig = {
             zweifach: {
@@ -334,12 +337,12 @@
             const svgDoc = parser.parseFromString(templates[currentTemplate], 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
 
-            // Get field values
+            // Get field values with smart defaults
             const fields = {
                 'Awardee Name': document.getElementById('awardeeName').value || 'Awardee Name',
-                'Year': document.getElementById('year').value || '2025',
-                'Start Year': document.getElementById('startYear').value || '2024',
-                'End Year': document.getElementById('endYear').value || '2025'
+                'Year': document.getElementById('year').value || String(currentYear),
+                'Start Year': document.getElementById('startYear').value || String(currentYear - 2),
+                'End Year': document.getElementById('endYear').value || String(currentYear)
             };
 
             // Update text elements by ID
@@ -418,8 +421,19 @@
             if (currentTemplate === 'president') {
                 document.getElementById('startYearGroup').classList.remove('hidden');
                 document.getElementById('endYearGroup').classList.remove('hidden');
+                // Set default values if fields are empty
+                if (!document.getElementById('startYear').value) {
+                    document.getElementById('startYear').value = String(currentYear - 2);
+                }
+                if (!document.getElementById('endYear').value) {
+                    document.getElementById('endYear').value = String(currentYear);
+                }
             } else {
                 document.getElementById('yearGroup').classList.remove('hidden');
+                // Set default value if field is empty
+                if (!document.getElementById('year').value) {
+                    document.getElementById('year').value = String(currentYear);
+                }
             }
             
             updatePreview();
@@ -516,6 +530,11 @@
 
         // Initialize
         loadTemplates();
+        
+        // Set initial year values
+        document.getElementById('year').value = String(currentYear);
+        document.getElementById('startYear').value = String(currentYear - 2);
+        document.getElementById('endYear').value = String(currentYear);
     </script>
 </body>
 </html>
