@@ -510,14 +510,6 @@
         
         // Template configuration
         const templateConfig = {
-            zweifach: {
-                name: 'Zweifach Award',
-                file: 'Template_Zweifach_2025.svg',
-                replacements: [
-                    { find: 'Awardee M. Name, PhD', field: 'awardeeName' },
-                    { find: '####', field: 'year' }
-                ]
-            },
             landis: {
                 name: 'Landis Award',
                 file: 'Template_Landis2025.svg',
@@ -528,7 +520,7 @@
                 ]
             },
             president: {
-                name: 'Past President Award',
+                name: 'Past President',
                 file: 'Template_PastPresident2025.svg',
                 replacements: [
                     { find: 'Awardee Name', field: 'awardeeName' },
@@ -536,6 +528,14 @@
                     { find: 'End Year', field: 'endYear' },
                     { find: 'XXXX', field: 'startYear' },
                     { find: 'YYYY', field: 'endYear' }
+                ]
+            },
+            zweifach: {
+                name: 'Zweifach Award',
+                file: 'Template_Zweifach_2025.svg',
+                replacements: [
+                    { find: 'Awardee M. Name, PhD', field: 'awardeeName' },
+                    { find: '####', field: 'year' }
                 ]
             }
         };
