@@ -6,7 +6,7 @@ A Progressive Web App for creating professional award certificates with custom t
 
 ## Features
 
-- **Three Certificate Templates**: Zweifach Award, Landis Award, Past President Award
+- **Three Certificate Templates**: Landis Award, Past President, Zweifach Award
 - **Adobe Garamond Pro Fonts**: All weights embedded for consistent typography
 - **High-Resolution Export**: 600 DPI PNG with transparent background
 - **Vector Export**: SVG format for editing in Adobe Illustrator
@@ -82,7 +82,7 @@ To test locally:
 ## How to Use
 
 1. **Visit**: https://raytheengineer.github.io/AwardMaker/app.html
-2. **Select Template**: Choose from Zweifach, Landis, or Past President
+2. **Select Template**: Choose from Landis, Past President, or Zweifach
 3. **Enter Details**: Input awardee name and year (auto-fills current year)
 4. **Preview**: Real-time preview with centered text
 5. **Download**: Get 600 DPI PNG or SVG file
@@ -99,6 +99,6 @@ The app includes complete instructions for ordering physical awards:
 ## Font Information
 
 Templates use Adobe Garamond Pro with these specifications:
-- **Zweifach**: Name 30pt Bold, Year 30pt Bold Italic
 - **Landis**: Name 20pt Bold, Year 20pt Regular
 - **Past President**: Name 30pt Bold, Start Year 30pt Regular, End Year 25pt Regular
+- **Zweifach**: Name 30pt Bold, Year 30pt Bold Italic
