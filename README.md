@@ -22,6 +22,47 @@ A Progressive Web App for creating professional award certificates with custom t
 
 The application is fully deployed and operational on GitHub Pages.
 
+## Offline Usage
+
+The app works completely offline after your first visit! Here's how to set it up:
+
+### Initial Setup (Requires Internet)
+1. **Visit**: https://raytheengineer.github.io/AwardMaker/app.html
+2. **Wait for full load**: Ensure all templates and fonts are loaded
+3. **Test functionality**: Create a sample certificate to verify everything works
+4. **Cache confirmation**: Look for "ServiceWorker registered" in browser console (F12)
+
+### Using Offline
+Once cached, the app works without internet:
+
+**Desktop/Laptop:**
+- **Bookmark the URL** and access it normally from bookmarks
+- **Add to home screen** (Chrome/Edge): Click ⋮ menu → "Install Award Certificate Maker"
+- **Direct URL**: Type the URL in address bar (it loads from cache)
+
+**Mobile (iOS/Android):**
+- **Add to Home Screen**: 
+  - **Safari (iOS)**: Tap Share button → "Add to Home Screen"
+  - **Chrome (Android)**: Tap ⋮ menu → "Add to Home screen"
+- **Access like a native app**: Tap the home screen icon to launch offline
+
+### What Works Offline
+✅ All certificate templates
+✅ Text editing and preview
+✅ PNG and SVG downloads
+✅ All fonts and styling
+✅ Complete functionality
+
+### What Requires Internet
+❌ Initial app download/updates
+❌ Accessing award.com for ordering (obviously)
+❌ Links to external product pages
+
+### Troubleshooting Offline Mode
+- **Not working offline?** Revisit the URL while online to refresh the cache
+- **Missing templates?** Clear browser cache and reload while online
+- **Old version?** The app auto-updates when you visit while online
+
 ## Local Testing
 
 To test locally:
