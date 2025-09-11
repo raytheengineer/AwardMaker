@@ -241,7 +241,7 @@
             </div>
 
             <div class="preview-container">
-                <div id="preview-wrapper" style="width: 100%;">
+                <div id="preview-wrapper" style="width: 100%; display: flex; justify-content: center;">
                     <div id="loading" class="loading">Loading templates...</div>
                     <div id="preview" class="hidden"></div>
                 </div>
@@ -450,6 +450,32 @@
             input.addEventListener('input', updatePreview);
         });
 
+        // Generate filename in format: [year]-[Template Name]-[Awardee Name No Spaces]
+        function generateFilename(extension) {
+            // Get the year
+            let year;
+            if (currentTemplate === 'president') {
+                year = document.getElementById('endYear').value || String(currentYear);
+            } else {
+                year = document.getElementById('year').value || String(currentYear);
+            }
+            
+            // Get template name
+            const templateNames = {
+                'zweifach': 'Zweifach',
+                'landis': 'Landis',
+                'president': 'PastPresident'
+            };
+            const templateName = templateNames[currentTemplate] || 'Certificate';
+            
+            // Get awardee name and remove spaces
+            const awardeeName = document.getElementById('awardeeName').value || 'Awardee';
+            const awardeeNameNoSpaces = awardeeName.replace(/[^a-zA-Z0-9]/g, ''); // Remove all non-alphanumeric characters
+            
+            // Combine into filename
+            return `${year}-${templateName}-${awardeeNameNoSpaces}.${extension}`;
+        }
+        
         // Download as PNG
         async function downloadPNG() {
             if (!currentSVG) {
@@ -479,8 +505,8 @@
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
-                // Set canvas size for high resolution (3x)
-                const scale = 3;
+                // Set canvas size for 600 DPI (600/72 = 8.33x)
+                const scale = 600 / 72;
                 canvas.width = width * scale;
                 canvas.height = height * scale;
                 
@@ -497,9 +523,8 @@
                     // Scale the context
                     ctx.scale(scale, scale);
                     
-                    // White background
-                    ctx.fillStyle = 'white';
-                    ctx.fillRect(0, 0, width, height);
+                    // Transparent background - no fill needed
+                    // The canvas is transparent by default
                     
                     // Draw the image
                     ctx.drawImage(img, 0, 0, width, height);
@@ -511,7 +536,7 @@
                             const downloadUrl = URL.createObjectURL(blob);
                             const a = document.createElement('a');
                             a.href = downloadUrl;
-                            a.download = `certificate_${currentTemplate}_${Date.now()}.png`;
+                            a.download = generateFilename('png');
                             document.body.appendChild(a);
                             a.click();
                             document.body.removeChild(a);
@@ -552,7 +577,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `certificate_${currentTemplate}_${Date.now()}.svg`;
+            a.download = generateFilename('svg');
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
