@@ -124,6 +124,81 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
+        .instructions {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .instructions-header {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            transition: color 0.2s ease;
+        }
+        
+        .instructions-header:hover {
+            color: #667eea;
+        }
+        
+        .instructions-toggle {
+            margin-right: 10px;
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        
+        .instructions-toggle.expanded {
+            transform: rotate(90deg);
+        }
+        
+        .instructions-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 0;
+            opacity: 0;
+            padding-left: 10px;
+        }
+        
+        .instructions-content.expanded {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .instructions ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions ul li {
+            margin-bottom: 4px;
+        }
+        
+        .instructions a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .instructions a:hover {
+            text-decoration: underline;
+        }
+
         .buttons {
             display: flex;
             gap: 15px;
@@ -209,6 +284,37 @@
 <body>
     <div class="container">
         <h1>Award Certificate Maker</h1>
+        
+        <!-- User Instructions -->
+        <div class="instructions">
+            <h3 class="instructions-header" onclick="toggleInstructions()">
+                <span class="instructions-toggle">▶</span>
+                Instructions
+            </h3>
+            <div class="instructions-content" style="display: none;">
+                <ol>
+                <li>Select a template</li>
+                <li>Input awardee name</li>
+                <li>Year auto-fills with the current year, but can be changed if necessary</li>
+                <li>Download PNG (SVG may be downloaded if editing in Illustrator is required)</li>
+                <li>Navigate to <a href="https://award.com" target="_blank">award.com</a></li>
+                <li>Log in as secretary@microcirc.org</li>
+                <li>Search for an award:
+                    <ul>
+                        <li><strong><a href="https://www.award.com/Plaques/Personalized-Cherry-Finish-Plaques-1009.html" target="_blank">FPJ0001</a></strong> (for wood with a black/gold plate), 7"×9"</li>
+                        <li><strong><a href="https://www.award.com/Corporate-Acrylic-Awards/Clear-Rectangle-Acrylic-Award-3227.html" target="_blank">APP0036</a></strong> (for clear acrylic), 5"×8.75"</li>
+                    </ul>
+                </li>
+                <li>In the Design section, upload the new PNG by clicking Add Image</li>
+                <li>Drag the image to the top of the award area</li>
+                <li>Ensure Auto-Center is On</li>
+                <li>Enlarge the design by click-dragging the bottom left corner to the left edge of the design area. The design will enlarge and re-center.</li>
+                <li>Enlarge the design again by click-dragging the bottom right corner to the right edge of the design area. The design will enlarge and re-center.</li>
+                <li>Click the Vertical Center button to center the design vertically.</li>
+                <li>Add to the cart and complete checkout, shipping to intended MCS officer.</li>
+                </ol>
+            </div>
+        </div>
         
         <div class="controls">
             <div class="inputs">
@@ -602,6 +708,25 @@
                     .then(registration => console.log('ServiceWorker registered'))
                     .catch(err => console.log('ServiceWorker registration failed:', err));
             });
+        }
+
+        // Toggle instructions accordion
+        function toggleInstructions() {
+            const content = document.querySelector('.instructions-content');
+            const toggle = document.querySelector('.instructions-toggle');
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                toggle.classList.remove('expanded');
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+                // Small delay to allow display change to take effect before animation
+                setTimeout(() => {
+                    content.classList.add('expanded');
+                    toggle.classList.add('expanded');
+                }, 10);
+            }
         }
 
         // Initialize
