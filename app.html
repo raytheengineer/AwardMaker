@@ -306,60 +306,41 @@
                     const response = await fetch(config.file);
                     let svgText = await response.text();
                     
-                    // Pre-process the template to set text-anchor to middle for awardee names
-                    const parser = new DOMParser();
-                    const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-                    const svgElement = svgDoc.documentElement;
+                    // Get template center from viewBox using string matching
+                    const viewBoxMatch = svgText.match(/viewBox=["']([^"']+)["']/);
+                    const documentWidth = viewBoxMatch ? viewBoxMatch[1].split(' ')[2] : '360';
+                    const centerX = parseFloat(documentWidth) / 2;
                     
-                    // Get template center from viewBox
-                    const viewBox = svgElement.getAttribute('viewBox');
-                    let templateCenterX = 252; // Default
-                    if (viewBox) {
-                        const parts = viewBox.split(' ');
-                        const width = parseFloat(parts[2]);
-                        templateCenterX = width / 2;
-                    }
-                    
-                    // Find and center the awardee name text element (not the group)
-                    let awardeeElement = null;
-                    
-                    // First try to find the group, then get the text element inside
-                    let awardeeGroup = svgElement.getElementById('Awardee_Name');
-                    if (awardeeGroup) {
-                        // Find the text element inside the group
-                        const textElements = awardeeGroup.getElementsByTagName('text');
-                        if (textElements.length > 0) {
-                            awardeeElement = textElements[0];
-                        }
-                    }
-                    
-                    // If still not found, try finding text elements with Awardee_Name in ID
-                    if (!awardeeElement) {
-                        const allElements = svgElement.getElementsByTagName('text');
-                        for (let el of allElements) {
-                            if (el.id && el.id.includes('Awardee_Name') && el.tagName === 'text') {
-                                awardeeElement = el;
-                                break;
+                    // Pre-process the template to center awardee names using string replacement
+                    // This matches the MCS Award Maker approach
+                    svgText = svgText.replace(
+                        /<text([^>]*?)>Awardee M\. Name, PhD<\/text>/g,
+                        function(match, attributes) {
+                            // Skip if already has text-anchor
+                            if (attributes.includes('text-anchor')) {
+                                return match;
                             }
+                            
+                            // Update the transform matrix to center the text
+                            const transformMatch = attributes.match(/transform="matrix\(([^"]+)\)"/);
+                            if (transformMatch) {
+                                const matrix = transformMatch[1].split(/[\s,]+/).map(Number);
+                                matrix[4] = centerX; // Set X position to center
+                                const newMatrix = matrix.join(' ');
+                                
+                                const newAttributes = attributes.replace(
+                                    /transform="matrix\([^"]+\)"/,
+                                    `transform="matrix(${newMatrix})"`
+                                );
+                                
+                                return `<text${newAttributes} text-anchor="middle">Awardee M. Name, PhD</text>`;
+                            }
+                            
+                            return match;
                         }
-                    }
-                    if (awardeeElement) {
-                        // Move to template center
-                        const transform = awardeeElement.getAttribute('transform');
-                        if (transform && transform.includes('matrix')) {
-                            // Update X position in matrix to template center
-                            const newTransform = transform.replace(/matrix\(([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^)]+)\)/, 
-                                `matrix($1,$2,$3,$4,${templateCenterX},$6)`);
-                            awardeeElement.setAttribute('transform', newTransform);
-                        } else {
-                            awardeeElement.setAttribute('x', templateCenterX);
-                        }
-                        awardeeElement.setAttribute('text-anchor', 'middle');
-                        console.log(`Centered Awardee Name in ${key} at X=${templateCenterX}`);
-                    }
+                    );
                     
-                    // Serialize back to string
-                    svgText = new XMLSerializer().serializeToString(svgElement);
+                    console.log(`Centered Awardee Name in ${key} at X=${centerX}`);
                     templates[key] = svgText;
                     
                     const option = document.createElement('option');
@@ -384,7 +365,7 @@
 
             console.log('Updating preview for template:', currentTemplate);
 
-            // Start with the original template
+            // Start with the pre-processed template (already has centering applied)
             let svgContent = templates[currentTemplate];
             
             // Get field values
@@ -396,79 +377,30 @@
             };
 
             console.log('Field values:', fieldValues);
+            
+            // Use string replacement for all fields (like MCS Award Maker)
+            // Replace awardee name
+            svgContent = svgContent.replace(/Awardee M\. Name, PhD/g, fieldValues.awardeeName);
 
-            // Parse SVG to update specific elements
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
-            const svgElement = svgDoc.documentElement;
-
-            // Find and update elements using correct IDs
-            
-            // Update Awardee Name - find the text element, not the group
-            let awardeeElement = null;
-            
-            // First try to find the group, then get the text element inside
-            let awardeeGroup = svgElement.getElementById('Awardee_Name');
-            if (awardeeGroup) {
-                // Find the text element inside the group
-                const textElements = awardeeGroup.getElementsByTagName('text');
-                if (textElements.length > 0) {
-                    awardeeElement = textElements[0];
-                }
-            }
-            
-            // If still not found, try finding text elements with Awardee_Name in ID
-            if (!awardeeElement) {
-                const allElements = svgElement.getElementsByTagName('text');
-                for (let el of allElements) {
-                    if (el.id && el.id.includes('Awardee_Name')) {
-                        awardeeElement = el;
-                        break;
+            // Replace year fields based on template type
+            if (currentTemplate === 'president') {
+                // For Past President, replace #### with start/end years based on context
+                svgContent = svgContent.replace(/####/g, function(match, offset, string) {
+                    const beforeText = string.substring(Math.max(0, offset - 100), offset);
+                    if (beforeText.includes('Start_Year') || beforeText.includes('Start Year')) {
+                        return fieldValues.startYear;
+                    } else if (beforeText.includes('End_Year') || beforeText.includes('End Year')) {
+                        return fieldValues.endYear;
                     }
-                }
-            }
-            
-            if (awardeeElement) {
-                console.log('Found Awardee Name text element, updating to:', fieldValues.awardeeName);
-                awardeeElement.textContent = fieldValues.awardeeName || 'Awardee M. Name, PhD';
+                    return match;
+                });
             } else {
-                console.log('❌ Could not find Awardee Name text element');
+                // For Landis and Zweifach, replace all #### with the year
+                svgContent = svgContent.replace(/####/g, fieldValues.year);
             }
             
-            // Update Year - try both simple and complex IDs
-            let yearElement = svgElement.getElementById('Year');
-            if (!yearElement) {
-                // Try finding by complex ID pattern
-                const allElements = svgElement.getElementsByTagName('text');
-                for (let el of allElements) {
-                    if (el.id && el.id.includes('Year_') && el.textContent.trim() === '####') {
-                        yearElement = el;
-                        break;
-                    }
-                }
-            }
-            if (yearElement) {
-                console.log('Found Year element, updating to:', fieldValues.year);
-                yearElement.textContent = fieldValues.year;
-            } else {
-                console.log('❌ Could not find Year element');
-            }
-            
-            // Update Start Year and End Year (for Past President)
-            const startYearElement = svgElement.getElementById('Start_Year');
-            if (startYearElement) {
-                console.log('Found Start_Year element, updating to:', fieldValues.startYear);
-                startYearElement.textContent = fieldValues.startYear;
-            }
-            
-            const endYearElement = svgElement.getElementById('End_Year');
-            if (endYearElement) {
-                console.log('Found End_Year element, updating to:', fieldValues.endYear);
-                endYearElement.textContent = fieldValues.endYear;
-            }
-
-            // Serialize back to string
-            currentSVG = new XMLSerializer().serializeToString(svgElement);
+            // Store the updated SVG
+            currentSVG = svgContent;
             
             // Update the preview
             const previewDiv = document.getElementById('preview');
