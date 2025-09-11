@@ -2,24 +2,25 @@
 
 A Progressive Web App for creating professional award certificates with custom templates.
 
+🔗 **Live App**: https://raytheengineer.github.io/AwardMaker/app.html
+
 ## Features
 
-- Three certificate templates: Zweifach Award, Landis Award, Past President Award
-- Adobe Garamond Pro font support with all weights
-- High-resolution PNG export
-- SVG export for editing
-- Works offline after first visit
-- No installation required
+- **Three Certificate Templates**: Zweifach Award, Landis Award, Past President Award
+- **Adobe Garamond Pro Fonts**: All weights embedded for consistent typography
+- **High-Resolution Export**: 600 DPI PNG with transparent background
+- **Vector Export**: SVG format for editing in Adobe Illustrator
+- **Collapsible Instructions**: Complete workflow guidance with direct award.com product links
+- **Smart Filename Generation**: Format: `[year]-[Template]-[AwardeeNameNoSpaces]`
+- **Centered Preview**: Professional preview with proper text centering
+- **Progressive Web App**: Works offline after first visit, no installation required
+- **Mobile Friendly**: Responsive design works on all devices
 
-## Setup for GitHub Pages
+## Live Application
 
-1. Create a new GitHub repository
-2. Upload all files from this v1 folder
-3. Go to Settings → Pages
-4. Select "Deploy from a branch"
-5. Choose "main" branch and "/ (root)" folder
-6. Click Save
-7. Your app will be available at: `https://[username].github.io/[repository-name]/app.html`
+✅ **Ready to Use**: https://raytheengineer.github.io/AwardMaker/app.html
+
+The application is fully deployed and operational on GitHub Pages.
 
 ## Local Testing
 
@@ -28,22 +29,31 @@ To test locally:
 2. Run: `python3 -m http.server 8000`
 3. Open browser to: `http://localhost:8000/app.html`
 
-## Files Structure
+## Technical Details
 
-- `app.html` - Main application
-- `index.html` - Simple version (backup)
-- `*.svg` - Certificate templates
-- `*.otf` - Adobe Garamond Pro fonts
-- `manifest.json` - PWA configuration
-- `service-worker.js` - Offline functionality
+- **Frontend**: Pure HTML/CSS/JavaScript PWA
+- **Fonts**: Adobe Garamond Pro embedded as base64 (no external files needed)
+- **Templates**: Three SVG certificate templates with dynamic text replacement
+- **Export**: Canvas-based PNG generation at 600 DPI
+- **Offline**: Service worker enables offline functionality
+- **Hosting**: GitHub Pages (no server required)
 
-## Usage
+## How to Use
 
-1. Open the app in a browser
-2. Select a certificate template
-3. Enter recipient information
-4. Preview updates in real-time
-5. Download as PNG or SVG
+1. **Visit**: https://raytheengineer.github.io/AwardMaker/app.html
+2. **Select Template**: Choose from Zweifach, Landis, or Past President
+3. **Enter Details**: Input awardee name and year (auto-fills current year)
+4. **Preview**: Real-time preview with centered text
+5. **Download**: Get 600 DPI PNG or SVG file
+6. **Order Award**: Follow instructions to order physical awards from award.com
+
+## Award Ordering Integration
+
+The app includes complete instructions for ordering physical awards:
+- **FPJ0001**: Wood plaques with black/gold plate (7"×9")
+- **APP0036**: Clear acrylic awards (5"×8.75")
+- Direct links to award.com product pages
+- Step-by-step upload and sizing guidance
 
 ## Font Information
 
